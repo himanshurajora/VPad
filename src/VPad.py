@@ -1,123 +1,95 @@
 from PyQt5 import QtWidgets, QtCore, QtGui, uic
-from os import getcwd
-import os
-
+from os import getcwd,system
 
 class VPad(QtWidgets.QMainWindow):
     def __init__(self):
         super().__init__()
-        self.SetupUi()      
-        self.file_saved = False
+        uic.loadUi("vpadui.ui", self) 
+        self.assignValues()
 
-    def SetupUi(self):
-        self.setWindowTitle("hello")
-        self.setGeometry(0,0,1350,950)
-        self.centralwidget = QtWidgets.QWidget(self)
-        self.centralwidget.setObjectName("centralwidget")
-        self.gridLayout_2 = QtWidgets.QGridLayout(self.centralwidget)
-        self.gridLayout_2.setObjectName("gridLayout_2")
-        self.gridLayout = QtWidgets.QGridLayout()
-        self.gridLayout.setObjectName("gridLayout")
-        self.plainTextEdit = QtWidgets.QPlainTextEdit(self.centralwidget)
-        self.plainTextEdit.setObjectName("plainTextEdit")
-        self.gridLayout.addWidget(self.plainTextEdit, 0, 0, 1, 1)
-        self.formLayout = QtWidgets.QFormLayout()
-        self.formLayout.setObjectName("formLayout")
-        self.Button_Clear = QtWidgets.QPushButton(self.centralwidget)
-        self.Button_Clear.setEnabled(True)
-        font = QtGui.QFont()
-        font.setFamily("Open Sans")
-        font.setPointSize(10)
-        self.Button_Clear.setFont(font)
-        self.Button_Clear.setCursor(QtGui.QCursor(QtCore.Qt.ArrowCursor))
-        self.Button_Clear.setMouseTracking(False)
-        self.Button_Clear.setObjectName("Button_Clear")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.LabelRole, self.Button_Clear)
-        self.Button_Run = QtWidgets.QPushButton(self.centralwidget)
-        font = QtGui.QFont()
-        font.setFamily("Open Sans")
-        font.setPointSize(10)
-        self.Button_Run.setFont(font)
-        self.Button_Run.setObjectName("Button_Run")
-        self.formLayout.setWidget(0, QtWidgets.QFormLayout.FieldRole, self.Button_Run)
-        self.gridLayout.addLayout(self.formLayout, 1, 0, 1, 1)
-        self.gridLayout_2.addLayout(self.gridLayout, 0, 0, 1, 1)
-        self.setCentralWidget(self.centralwidget)
-        self.menubar = QtWidgets.QMenuBar(self)
-        self.menubar.setGeometry(QtCore.QRect(0, 0, 1364, 18))
-        self.menubar.setObjectName("menubar")
-        self.menuFile = QtWidgets.QMenu(self.menubar)
-        self.menuFile.setObjectName("menuFile")
-        self.menuAbout = QtWidgets.QMenu(self.menubar)
-        self.menuAbout.setObjectName("menuAbout")
-        self.setMenuBar(self.menubar)
-        self.statusbar = QtWidgets.QStatusBar(self)
-        self.statusbar.setObjectName("statusbar")
-        self.setStatusBar(self.statusbar)
-        self.actionNew = QtWidgets.QAction(self)
-        self.actionNew.setShortcutVisibleInContextMenu(False)
-        self.actionNew.setObjectName("actionNew")
-        self.actionSave = QtWidgets.QAction(self)
-        self.actionSave.setObjectName("actionSave")
-        self.actionClose = QtWidgets.QAction(self)
-        self.actionClose.setObjectName("actionClose")
-        self.actionVPad = QtWidgets.QAction(self)
-        self.actionVPad.setObjectName("actionVPad")
-        self.menuFile.addAction(self.actionNew)
-        self.menuFile.addAction(self.actionSave)
-        self.menuFile.addAction(self.actionClose)
-        self.menuAbout.addAction(self.actionVPad)
-        self.menubar.addAction(self.menuFile.menuAction())
-        self.menubar.addAction(self.menuAbout.menuAction())
-        self.actionClose.setShortcut("Ctrl + Q")
-        self.actionClose.triggered.connect(self.Close)
+    def assignValues(self):
+        self.Button_Run = self.findChild(QtWidgets.QPushButton, "Button_Run")
         self.Button_Run.clicked.connect(self.Run)
+        self.Button_Clear = self.findChild(QtWidgets.QPushButton, "Button_Clear")
         self.Button_Clear.clicked.connect(self.Clear)
-        self.show()
-        self.retranslateUi()
+        self.Button_Clear_Console = self.findChild(QtWidgets.QPushButton, "Button_Clear_Console")
+        self.Button_Clear_Console.clicked.connect(self.Clear_Console)
+        self.plainTextEdit = self.findChild(QtWidgets.QPlainTextEdit, "plainTextEdit")
+        self.Font_Slider = self.findChild(QtWidgets.QAbstractSlider, "Font_Slider")
+        self.Font_Slider.setValue(10)
+        self.Font_Slider.valueChanged.connect(self.SetNewFontSize)
+        self.actionClose = self.findChild(QtWidgets.QAction, "actionClose")
+        self.actionClose.triggered.connect(QtWidgets.QApplication.instance().quit)
+        self.actionSave = self.findChild(QtWidgets.QAction, "actionSave")
+        self.actionOpen = self.findChild(QtWidgets.QAction, "actionOpen")
+        self.actionSave_As = self.findChild(QtWidgets.QAction, "actionSave_As")
+        self.actionVPad = self.findChild(QtWidgets.QAction, "actionVPad")
+        self.actionVedik_Cyber_Forces = self.findChild(QtWidgets.QAction, "actionVedik_Cyber_Forces")
+        self.actionVPad.triggered.connect(self.AboutVpad)
+        self.actionVedik_Cyber_Forces.triggered.connect(self.AboutVCF)
+        self.actionOpen.triggered.connect(self.Open)
+        self.code = self.plainTextEdit.toPlainText()
+        self.actionSave_As.triggered.connect(self.SaveAs)
+        self.actionSave.triggered.connect(self.Save)
+    def Open(self):
+        #open file code here
+        filename = QtWidgets.QFileDialog.getOpenFileName(self,'Open File',"C:/", "Python Files (*.py)")
+        self.currentfilepath = filename[0]
+        self.currentfile = open(self.currentfilepath, "r")
+        self.code = self.currentfile.read()
+        self.plainTextEdit.setPlainText(self.code)
+        self.currentfile.close()
 
-    def retranslateUi(self):
-        _translate = QtCore.QCoreApplication.translate
-        self.setWindowTitle(_translate("MainWindow", "VPad"))
-        self.Button_Clear.setText(_translate("MainWindow", "Clear"))
-        self.Button_Run.setText(_translate("MainWindow", "Run"))
-        self.menuFile.setTitle(_translate("MainWindow", "File"))
-        self.menuAbout.setTitle(_translate("MainWindow", "About"))
-        self.actionNew.setText(_translate("MainWindow", "New"))
-        self.actionSave.setText(_translate("MainWindow", "Save"))
-        self.actionClose.setText(_translate("MainWindow", "Close"))
-        self.actionVPad.setText(_translate("MainWindow", "VPad"))
-    def Close(self):
-        QtWidgets.QApplication.quit()
-
+    def AboutVpad(self):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setText("VPad is a simple Python IDE created by VCF")
+        msg.setInformativeText("License - GNU GPL v3.0")
+        msg.setWindowTitle("About VPad")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msg.exec_()
+    def AboutVCF(self):
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setText("For Information About Vedik Cyber Forces \n Go to https://vcfstudio.in")
+        msg.setWindowTitle("About VCF")
+        msg.setStandardButtons(QtWidgets.QMessageBox.Ok)
+        msg.exec_()
     def Clear(self):
         self.plainTextEdit.setPlainText("")
-    # def Save(self):
-    #     self.code = self.plainTextEdit.toPlainText()
-    #     self.filename = self.currentfile.name
-    #     self.currentfile = open(self.filename, "w")
-    #     self.currentfile.writelines(self.code)
-    #     self.currentfile.close()
+    
+    def SaveAs(self):
+        filename = QtWidgets.QFileDialog.getSaveFileName(self,'Save File','C:/',"Python Files (*.py)")
+        self.currentfilepath = filename[0]
+        self.currentfile = open(self.currentfilepath, "w")
+        self.code = self.plainTextEdit.toPlainText()
+        self.currentfile.write(self.code)
+        self.currentfile.close()
+
+    def Save(self):
+        if(self.currentfilepath is not ""):
+            self.currentfile = open(self.currentfilepath, "w")
+            self.code = self.plainTextEdit.toPlainText()
+            self.currentfile.write(self.code)
+            self.currentfile.close()
+        else: 
+            pass
+
+    def SetNewFontSize(self):
+        newfont = QtGui.QFont()
+        newfont.setPointSize(self.Font_Slider.value())
+        self.plainTextEdit.setFont(newfont)
+
     def Run(self):
         self.currentfile = open("defaultindexfile.py", "w")
         self.code = self.plainTextEdit.toPlainText()
         self.currentfile.write(self.code)
         self.currentfile.close()
         self.runfile = getcwd() + "/" + self.currentfile.name
-        os.system("python " + self.runfile)
-        
-
-    def SaveAs(self):
-        self.filename, ok = QtWidgets.QInputDialog.getText(self, "Save", "Enter file name to save as: ")
-        if ok:
-            if self.filename == "":
-                self.filename = "index.py"
-                self.currentfile = open(self.filename, "w")
-                self.Save()
-            else:
-                self.currentfile = open(self.filename + ".py", "w")
-                self.file_saved = True
-                self.Save()
+        system("python " + self.runfile)
+    
+    def Clear_Console(self):
+        system("cls")
 
 if __name__ == "__main__":
     import sys
